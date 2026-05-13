@@ -1,30 +1,31 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from 'express';
+import { User } from '../models/User'; // Make sure this path to your User model is correct!
+import jwt from 'jsonwebtoken';
 
-const user = await User.findById(req.userId as string);
-jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET!, { expiresIn: "15m" });
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // 1. Get token from header
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        
+        if (!token) {
+            return res.status(401).json({ message: 'No token, authorization denied' });
+        }
 
-export interface AuthRequest extends Request {
-  userId?: string;
-  userRole?: string;
-}
+        // 2. Verify token
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'your_secret');
+        
+        // 3. Find user (This was likely where your error was)
+        // Ensure 'User' is imported and this is inside the async function
+        const user = await User.findById(decoded.id); 
 
-export const protect = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "Not authorized" });
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string; role?: string };
-    req.userId = decoded.userId;
-    req.userRole = decoded.role;
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid or expired token" });
-  }
-};
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
 
-export const requireRole = (roles: string[]) => (req: AuthRequest, res: Response, next: NextFunction) => {
-  if (!req.userRole || !roles.includes(req.userRole)) {
-    return res.status(403).json({ message: "Forbidden: insufficient permissions" });
-  }
-  next();
+        // 4. Attach user to request object
+        (req as any).user = user;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: 'Token is not valid' });
+    }
 };
