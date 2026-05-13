@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/User'; // Double check if your file is 'User.ts' or 'user.ts'
+import User from '../models/user'; // Double check if your file is 'User.ts' or 'user.ts'
 
 // Define the AuthRequest interface that your routes are looking for
 export interface AuthRequest extends Request {
