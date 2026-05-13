@@ -69,7 +69,6 @@ router.post("/login", loginRules, async (req: Request, res: Response) => {
 });
 
 // ── GET /api/auth/me ──────────────────────────────────────────
-import { protect, AuthRequest } from "../middleware/auth";
 router.get("/me", protect, async (req: AuthRequest, res: Response) => {
   try {
     const user = await User.findById(req.userId).select("-password");
