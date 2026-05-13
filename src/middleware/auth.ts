@@ -5,6 +5,7 @@ import User from '../models/user'; // Double check if your file is 'User.ts' or 
 // Define the AuthRequest interface that your routes are looking for
 export interface AuthRequest extends Request {
     user?: any;
+    userId?: string;
 }
 
 // Your routes call this 'protect'
