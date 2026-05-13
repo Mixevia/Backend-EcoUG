@@ -20,6 +20,7 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
         if (!user) return res.status(401).json({ message: 'User not found' });
 
         req.user = user;
+        req.userId = user._id.toString(); 
         next();
     } catch (err) {
         res.status(401).json({ message: 'Token invalid' });
